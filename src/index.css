@@ -77,3 +77,28 @@
   border-radius: 1rem;
   z-index: 10;
 }
+
+@keyframes live-radar-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 18px rgba(244, 63, 94, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+  }
+}
+
+.live-partner-radar {
+  animation: live-radar-pulse 2s infinite cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.custom-partner-marker {
+  background: transparent !important;
+  border: none !important;
+}
+

@@ -25,9 +25,22 @@ export interface CoupleSpaceData {
   petData?: string;
   partner1OnlineAt?: string;
   partner2OnlineAt?: string;
+  partner1Location?: string; // JSON string of LivePartnerLocation
+  partner2Location?: string; // JSON string of LivePartnerLocation
   bucketListData?: string;
   moodDiaryData?: string;
   playlistData?: string;
+}
+
+export interface LivePartnerLocation {
+  lat: number;
+  lng: number;
+  address?: string;
+  updatedAt: string;
+  accuracy?: number;
+  batteryLevel?: number;
+  speed?: number;
+  isSharing: boolean;
 }
 
 export interface BucketListItem {

@@ -24,6 +24,8 @@
         "lastPingBy": { "type": "string", "maxLength": 60 },
         "partner1OnlineAt": { "type": "string", "maxLength": 50 },
         "partner2OnlineAt": { "type": "string", "maxLength": 50 },
+        "partner1Location": { "type": "string", "maxLength": 1000 },
+        "partner2Location": { "type": "string", "maxLength": 1000 },
         "bucketListData": { "type": "string", "maxLength": 100000 },
         "moodDiaryData": { "type": "string", "maxLength": 100000 },
         "playlistData": { "type": "string", "maxLength": 20000 },

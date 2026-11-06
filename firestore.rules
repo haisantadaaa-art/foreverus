@@ -36,6 +36,8 @@ service cloud.firestore {
         && (!('lastPingBy' in data) || (data.lastPingBy is string && data.lastPingBy.size() <= 60))
         && (!('partner1OnlineAt' in data) || (data.partner1OnlineAt is string && data.partner1OnlineAt.size() <= 50))
         && (!('partner2OnlineAt' in data) || (data.partner2OnlineAt is string && data.partner2OnlineAt.size() <= 50))
+        && (!('partner1Location' in data) || (data.partner1Location is string && data.partner1Location.size() <= 1000))
+        && (!('partner2Location' in data) || (data.partner2Location is string && data.partner2Location.size() <= 1000))
         && (!('bucketListData' in data) || (data.bucketListData is string && data.bucketListData.size() <= 100000))
         && (!('moodDiaryData' in data) || (data.moodDiaryData is string && data.moodDiaryData.size() <= 100000))
         && (!('playlistData' in data) || (data.playlistData is string && data.playlistData.size() <= 20000));

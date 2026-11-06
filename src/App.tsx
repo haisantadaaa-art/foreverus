@@ -35,6 +35,7 @@ import {
   BucketListItem,
   DailyMoodRecord,
   LoveSong,
+  LivePartnerLocation,
 } from './types';
 import { Heart, Sparkles } from 'lucide-react';
 
@@ -366,6 +367,10 @@ export default function App() {
     setPlaces((prev) => prev.filter((p) => p.id !== placeId));
   };
 
+  const handleUpdatePartnerLocation = async (loc: LivePartnerLocation) => {
+    await coupleService.updateLiveLocation(currentUserRole, loc);
+  };
+
   // Schedules handlers
   const handleAddSchedule = async (
     sch: Omit<ScheduleEvent, 'id' | 'createdAt'>
@@ -573,6 +578,9 @@ export default function App() {
             places={places}
             onAddPlace={handleAddPlace}
             onDeletePlace={handleDeletePlace}
+            space={space}
+            currentUserRole={currentUserRole}
+            onUpdateLocation={handleUpdatePartnerLocation}
           />
         )}
       </main>

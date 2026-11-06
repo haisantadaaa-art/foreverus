@@ -15,6 +15,7 @@ import {
   DatePlace,
   ScheduleEvent,
   CoupleLiveChatMessage,
+  LivePartnerLocation,
 } from '../types';
 
 const STORAGE_KEYS = {
@@ -302,6 +303,8 @@ export class CoupleService {
           petData: updated.petData || '',
           partner1OnlineAt: updated.partner1OnlineAt || '',
           partner2OnlineAt: updated.partner2OnlineAt || '',
+          partner1Location: updated.partner1Location || '',
+          partner2Location: updated.partner2Location || '',
           bucketListData: updated.bucketListData || '',
           moodDiaryData: updated.moodDiaryData || '',
           playlistData: updated.playlistData || '',
@@ -313,6 +316,27 @@ export class CoupleService {
     }
 
     return updated;
+  }
+
+  // Update Real-Time Live Location for Partner 1 or Partner 2
+  async updateLiveLocation(role: 'partner1' | 'partner2', location: LivePartnerLocation): Promise<void> {
+    const locString = JSON.stringify(location);
+    const existing = this.loadSpaceData();
+    const updated: CoupleSpaceData = {
+      ...existing,
+      ...(role === 'partner1' ? { partner1Location: locString } : { partner2Location: locString }),
+    };
+    setLocalCache(STORAGE_KEYS.SPACE_DATA + this.currentSpaceId, updated);
+    try {
+      const spaceDocRef = doc(db, 'couple_spaces', this.currentSpaceId);
+      await setDoc(
+        spaceDocRef,
+        role === 'partner1' ? { partner1Location: locString } : { partner2Location: locString },
+        { merge: true }
+      );
+    } catch (err) {
+      handleFirestoreError(err, OperationType.WRITE, `couple_spaces/${this.currentSpaceId}`);
+    }
   }
 
   // Update Online Presence Heartbeat
@@ -369,6 +393,8 @@ export class CoupleService {
             petData: docData.petData !== undefined ? docData.petData : current.petData,
             partner1OnlineAt: docData.partner1OnlineAt || current.partner1OnlineAt,
             partner2OnlineAt: docData.partner2OnlineAt || current.partner2OnlineAt,
+            partner1Location: docData.partner1Location !== undefined ? docData.partner1Location : current.partner1Location,
+            partner2Location: docData.partner2Location !== undefined ? docData.partner2Location : current.partner2Location,
             bucketListData: docData.bucketListData !== undefined ? docData.bucketListData : current.bucketListData,
             moodDiaryData: docData.moodDiaryData !== undefined ? docData.moodDiaryData : current.moodDiaryData,
             playlistData: docData.playlistData !== undefined ? docData.playlistData : current.playlistData,
