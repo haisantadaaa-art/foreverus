@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "CoupleSpace": {
+      "title": "CoupleSpace",
+      "description": "Shared couple space with anniversary settings and partner profiles",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 100 },
+        "partner1Name": { "type": "string", "maxLength": 60 },
+        "partner1Avatar": { "type": "string", "maxLength": 200000 },
+        "partner1Mood": { "type": "string", "maxLength": 100 },
+        "partner2Name": { "type": "string", "maxLength": 60 },
+        "partner2Avatar": { "type": "string", "maxLength": 200000 },
+        "partner2Mood": { "type": "string", "maxLength": 100 },
+        "startDate": { "type": "string", "maxLength": 50 },
+        "quote": { "type": "string", "maxLength": 300 },
+        "themeColor": { "type": "string", "maxLength": 50 },
+        "customBgImage": { "type": "string", "maxLength": 200000 },
+        "customBgOpacity": { "type": "number" },
+        "customBgBlur": { "type": "number" },
+        "petData": { "type": "string", "maxLength": 10000 },
+        "passcode": { "type": "string", "maxLength": 20 },
+        "lastPingAt": { "type": "string", "maxLength": 50 },
+        "lastPingBy": { "type": "string", "maxLength": 60 },
+        "partner1OnlineAt": { "type": "string", "maxLength": 50 },
+        "partner2OnlineAt": { "type": "string", "maxLength": 50 },
+        "bucketListData": { "type": "string", "maxLength": 100000 },
+        "moodDiaryData": { "type": "string", "maxLength": 100000 },
+        "playlistData": { "type": "string", "maxLength": 20000 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "partner1Name", "partner2Name", "startDate"]
+    },
+    "CoupleMessage": {
+      "title": "CoupleMessage",
+      "description": "Love letters and anonymous or secret whisper messages",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string", "maxLength": 60 },
+        "content": { "type": "string", "maxLength": 2000 },
+        "isSecret": { "type": "boolean" },
+        "unlockDate": { "type": "string", "maxLength": 50 },
+        "reactions": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sender", "content", "isSecret"]
+    },
+    "CoupleMemory": {
+      "title": "CoupleMemory",
+      "description": "Shared photo album memory",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 150 },
+        "caption": { "type": "string", "maxLength": 1000 },
+        "imageUrl": { "type": "string", "maxLength": 200000 },
+        "date": { "type": "string", "maxLength": 50 },
+        "tag": { "type": "string", "maxLength": 50 },
+        "likes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "imageUrl", "date"]
+    },
+    "CoupleDatePlace": {
+      "title": "CoupleDatePlace",
+      "description": "Dating coordinate location and memorable place",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 120 },
+        "address": { "type": "string", "maxLength": 250 },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "category": { "type": "string", "maxLength": 50 },
+        "notes": { "type": "string", "maxLength": 600 },
+        "dateVisited": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "lat", "lng"]
+    },
+    "CoupleSchedule": {
+      "title": "CoupleSchedule",
+      "description": "Weekly day schedule event or milestone reminder",
+      "type": "object",
+      "properties": {
+        "dayOfWeek": { "type": "number" },
+        "title": { "type": "string", "maxLength": 150 },
+        "time": { "type": "string", "maxLength": 30 },
+        "location": { "type": "string", "maxLength": 150 },
+        "notes": { "type": "string", "maxLength": 500 },
+        "isSpecial": { "type": "boolean" },
+        "weatherIcon": { "type": "string", "maxLength": 50 },
+        "temperature": { "type": "string", "maxLength": 30 },
+        "weatherDesc": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["dayOfWeek", "title"]
+    },
+    "CoupleLiveChat": {
+      "title": "CoupleLiveChat",
+      "description": "Real-time couple chat messages with stickers, photos, and voice notes",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string", "maxLength": 60 },
+        "senderRole": { "type": "string", "maxLength": 20 },
+        "content": { "type": "string", "maxLength": 2000 },
+        "imageUrl": { "type": "string", "maxLength": 200000 },
+        "audioUrl": { "type": "string", "maxLength": 300000 },
+        "sticker": { "type": "string", "maxLength": 50 },
+        "isVoice": { "type": "boolean" },
+        "voiceDuration": { "type": "number" },
+        "isWhisper": { "type": "boolean" },
+        "isRead": { "type": "boolean" },
+        "readAt": { "type": "string", "maxLength": 50 },
+        "reactions": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sender", "senderRole"]
+    }
+  },
+  "firestore": {
+    "/couple_spaces/{spaceId}": {
+      "schema": "CoupleSpace",
+      "description": "Information and profile settings of a couple space"
+    },
+    "/couple_spaces/{spaceId}/messages/{messageId}": {
+      "schema": "CoupleMessage",
+      "description": "Anonymous and love messages for the couple space"
+    },
+    "/couple_spaces/{spaceId}/live_chats/{chatId}": {
+      "schema": "CoupleLiveChat",
+      "description": "Real-time live messaging between the couple"
+    },
+    "/couple_spaces/{spaceId}/memories/{memoryId}": {
+      "schema": "CoupleMemory",
+      "description": "Photos and memory gallery of the couple space"
+    },
+    "/couple_spaces/{spaceId}/date_places/{placeId}": {
+      "schema": "CoupleDatePlace",
+      "description": "Dating coordinates and memorable locations of the couple"
+    },
+    "/couple_spaces/{spaceId}/schedules/{scheduleId}": {
+      "schema": "CoupleSchedule",
+      "description": "Day of week schedule events and reminders for the couple"
+    }
+  }
+}

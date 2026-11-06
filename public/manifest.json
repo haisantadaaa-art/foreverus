@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "name": "ForeverUs - Nhật Ký & Không Gian Cặp Đôi",
+  "short_name": "ForeverUs",
+  "description": "Không gian đếm ngày yêu, nhắn tin trực tiếp, 100 điều ước, lịch cảm xúc và game đôi lứa ngọt ngào.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff5f7",
+  "theme_color": "#ff4d6d",
+  "categories": ["lifestyle", "social"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

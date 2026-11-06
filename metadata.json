@@ -1,0 +1,6 @@
+{
+  "name": "ForeverUs - Đếm Ngày Yêu & Nhật Ký Cặp Đôi",
+  "description": "Ứng dụng đếm ngày yêu thương, lịch thứ hẹn hò, nhắn tin ẩn danh, album ảnh chung và bản đồ tọa độ kỷ niệm.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

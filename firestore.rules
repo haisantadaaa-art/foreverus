@@ -1,0 +1,152 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidCoupleSpace(data) {
+      return data.title is string && data.title.size() <= 100
+        && data.partner1Name is string && data.partner1Name.size() <= 60
+        && data.partner2Name is string && data.partner2Name.size() <= 60
+        && data.startDate is string && data.startDate.size() <= 50
+        && (!('partner1Mood' in data) || (data.partner1Mood is string && data.partner1Mood.size() <= 100))
+        && (!('partner2Mood' in data) || (data.partner2Mood is string && data.partner2Mood.size() <= 100))
+        && (!('quote' in data) || (data.quote is string && data.quote.size() <= 300))
+        && (!('passcode' in data) || (data.passcode is string && data.passcode.size() <= 20))
+        && (!('partner1Avatar' in data) || (data.partner1Avatar is string && data.partner1Avatar.size() <= 200000))
+        && (!('partner2Avatar' in data) || (data.partner2Avatar is string && data.partner2Avatar.size() <= 200000))
+        && (!('themeColor' in data) || (data.themeColor is string && data.themeColor.size() <= 50))
+        && (!('customBgImage' in data) || (data.customBgImage is string && data.customBgImage.size() <= 200000))
+        && (!('customBgOpacity' in data) || data.customBgOpacity is number)
+        && (!('customBgBlur' in data) || data.customBgBlur is number)
+        && (!('petData' in data) || (data.petData is string && data.petData.size() <= 10000))
+        && (!('lastPingAt' in data) || (data.lastPingAt is string && data.lastPingAt.size() <= 50))
+        && (!('lastPingBy' in data) || (data.lastPingBy is string && data.lastPingBy.size() <= 60))
+        && (!('partner1OnlineAt' in data) || (data.partner1OnlineAt is string && data.partner1OnlineAt.size() <= 50))
+        && (!('partner2OnlineAt' in data) || (data.partner2OnlineAt is string && data.partner2OnlineAt.size() <= 50))
+        && (!('bucketListData' in data) || (data.bucketListData is string && data.bucketListData.size() <= 100000))
+        && (!('moodDiaryData' in data) || (data.moodDiaryData is string && data.moodDiaryData.size() <= 100000))
+        && (!('playlistData' in data) || (data.playlistData is string && data.playlistData.size() <= 20000));
+    }
+
+    function isValidLiveChat(data) {
+      return data.sender is string && data.sender.size() <= 60
+        && data.senderRole is string && data.senderRole.size() <= 20
+        && (!('content' in data) || (data.content is string && data.content.size() <= 2000))
+        && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 200000))
+        && (!('audioUrl' in data) || (data.audioUrl is string && data.audioUrl.size() <= 300000))
+        && (!('sticker' in data) || (data.sticker is string && data.sticker.size() <= 50))
+        && (!('isVoice' in data) || data.isVoice is bool)
+        && (!('voiceDuration' in data) || data.voiceDuration is number)
+        && (!('isWhisper' in data) || data.isWhisper is bool)
+        && (!('isRead' in data) || data.isRead is bool)
+        && (!('readAt' in data) || (data.readAt is string && data.readAt.size() <= 50))
+        && (!('reactions' in data) || (data.reactions is list && data.reactions.size() <= 20));
+    }
+
+    function isValidMessage(data) {
+      return data.sender is string && data.sender.size() <= 60
+        && data.content is string && data.content.size() > 0 && data.content.size() <= 2000
+        && data.isSecret is bool
+        && (!('unlockDate' in data) || (data.unlockDate is string && data.unlockDate.size() <= 50))
+        && (!('reactions' in data) || (data.reactions is list && data.reactions.size() <= 20));
+    }
+
+    function isValidMemory(data) {
+      return data.title is string && data.title.size() <= 150
+        && data.imageUrl is string && data.imageUrl.size() <= 200000
+        && data.date is string && data.date.size() <= 50
+        && (!('caption' in data) || (data.caption is string && data.caption.size() <= 1000))
+        && (!('tag' in data) || (data.tag is string && data.tag.size() <= 50))
+        && (!('likes' in data) || data.likes is number);
+    }
+
+    function isValidDatePlace(data) {
+      return data.title is string && data.title.size() <= 120
+        && data.lat is number
+        && data.lng is number
+        && (!('address' in data) || (data.address is string && data.address.size() <= 250))
+        && (!('category' in data) || (data.category is string && data.category.size() <= 50))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 600))
+        && (!('dateVisited' in data) || (data.dateVisited is string && data.dateVisited.size() <= 50));
+    }
+
+    function isValidSchedule(data) {
+      return data.dayOfWeek is number && data.dayOfWeek >= 0 && data.dayOfWeek <= 6
+        && data.title is string && data.title.size() <= 150
+        && (!('time' in data) || (data.time is string && data.time.size() <= 30))
+        && (!('location' in data) || (data.location is string && data.location.size() <= 150))
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 500))
+        && (!('isSpecial' in data) || data.isSpecial is bool)
+        && (!('weatherIcon' in data) || (data.weatherIcon is string && data.weatherIcon.size() <= 50))
+        && (!('temperature' in data) || (data.temperature is string && data.temperature.size() <= 30))
+        && (!('weatherDesc' in data) || (data.weatherDesc is string && data.weatherDesc.size() <= 200));
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Couple Space rules
+    match /couple_spaces/{spaceId} {
+      allow get: if isValidId(spaceId);
+      allow list: if true;
+      allow create: if isValidId(spaceId) && isValidCoupleSpace(incoming());
+      allow update: if isValidId(spaceId) && isValidCoupleSpace(incoming());
+      allow delete: if isValidId(spaceId);
+
+      // Sub-collection: Anonymous & Secret Messages
+      match /messages/{messageId} {
+        allow get, list: if isValidId(spaceId);
+        allow create: if isValidId(spaceId) && isValidId(messageId) && isValidMessage(incoming());
+        allow update: if isValidId(spaceId) && isValidId(messageId) && isValidMessage(incoming());
+        allow delete: if isValidId(spaceId) && isValidId(messageId);
+      }
+
+      // Sub-collection: Live Couple Chat
+      match /live_chats/{chatId} {
+        allow get, list: if isValidId(spaceId);
+        allow create: if isValidId(spaceId) && isValidId(chatId) && isValidLiveChat(incoming());
+        allow update: if isValidId(spaceId) && isValidId(chatId) && isValidLiveChat(incoming());
+        allow delete: if isValidId(spaceId) && isValidId(chatId);
+      }
+
+      // Sub-collection: Memories / Photos
+      match /memories/{memoryId} {
+        allow get, list: if isValidId(spaceId);
+        allow create: if isValidId(spaceId) && isValidId(memoryId) && isValidMemory(incoming());
+        allow update: if isValidId(spaceId) && isValidId(memoryId) && isValidMemory(incoming());
+        allow delete: if isValidId(spaceId) && isValidId(memoryId);
+      }
+
+      // Sub-collection: Date Places / Coordinates
+      match /date_places/{placeId} {
+        allow get, list: if isValidId(spaceId);
+        allow create: if isValidId(spaceId) && isValidId(placeId) && isValidDatePlace(incoming());
+        allow update: if isValidId(spaceId) && isValidId(placeId) && isValidDatePlace(incoming());
+        allow delete: if isValidId(spaceId) && isValidId(placeId);
+      }
+
+      // Sub-collection: Day Schedules
+      match /schedules/{scheduleId} {
+        allow get, list: if isValidId(spaceId);
+        allow create: if isValidId(spaceId) && isValidId(scheduleId) && isValidSchedule(incoming());
+        allow update: if isValidId(spaceId) && isValidId(scheduleId) && isValidSchedule(incoming());
+        allow delete: if isValidId(spaceId) && isValidId(scheduleId);
+      }
+    }
+  }
+}

@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.font-romantic {
+  font-family: 'Dancing Script', cursive, sans-serif;
+}
+
+/* Custom romantic animated background gradient */
+.bg-romantic-light {
+  background: linear-gradient(135deg, #fff5f7 0%, #ffeef2 35%, #fff0f5 70%, #fdf2f8 100%);
+}
+
+.bg-romantic-dark {
+  background: linear-gradient(135deg, #120d18 0%, #1a1024 35%, #180b1e 70%, #0d0814 100%);
+}
+
+/* Floating animation for hearts and balloons */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(3deg);
+  }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+/* Heart pulse animation */
+@keyframes heartPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.15);
+  }
+  30% {
+    transform: scale(1.05);
+  }
+  45% {
+    transform: scale(1.18);
+  }
+}
+
+.animate-heart-pulse {
+  animation: heartPulse 1.8s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(244, 63, 94, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.45);
+}
+
+/* Leaflet map styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  z-index: 10;
+}

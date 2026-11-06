@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4d6d" />
+      <stop offset="50%" stop-color="#ff758f" />
+      <stop offset="100%" stop-color="#c9184a" />
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#ffe5ec" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+  <!-- Background with safe zone rounded rectangle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  
+  <!-- Outer subtle ring -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6" />
+
+  <!-- Dual interlocked couple hearts -->
+  <g filter="url(#glow)">
+    <!-- Primary Big Heart -->
+    <path d="M256,410 C256,410 110,318 110,200 C110,135 158,95 215,95 C250,95 272,120 286,140 C300,120 322,95 357,95 C414,95 462,135 462,200 C462,318 316,410 316,410 L256,410 Z" fill="url(#heartGrad)" />
+    
+    <!-- Inner Small Glow Heart -->
+    <path d="M256,360 C256,360 160,290 160,205 C160,160 195,130 235,130 C250,130 270,145 280,160 C290,145 310,130 325,130 C365,130 400,160 400,205 C400,290 304,360 304,360 L256,360 Z" fill="#ff4d6d" opacity="0.85" />
+    
+    <!-- Sparkle Stars -->
+    <circle cx="160" cy="140" r="10" fill="#fff" opacity="0.9" />
+    <circle cx="360" cy="130" r="14" fill="#fff" opacity="0.9" />
+    <polygon points="380,280 388,295 405,298 392,310 395,328 380,318 365,328 368,310 355,298 372,295" fill="#ffd166" />
+  </g>
+</svg>
