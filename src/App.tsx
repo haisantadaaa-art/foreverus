@@ -464,6 +464,7 @@ export default function App() {
           <CoupleGames
             partner1Name={space.partner1.name}
             partner2Name={space.partner2.name}
+            currentUserRole={currentUserRole}
             spaceId={space.id}
           />
         )}

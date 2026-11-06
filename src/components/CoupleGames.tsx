@@ -11,20 +11,23 @@ import confetti from 'canvas-confetti';
 import { CouplePetGame } from './games/CouplePetGame';
 import { CoupleCatchWordGame } from './games/CoupleCatchWordGame';
 import { CoupleWordChainGame } from './games/CoupleWordChainGame';
+import { CoupleCaroGame } from './games/CoupleCaroGame';
 
 interface CoupleGamesProps {
   partner1Name: string;
   partner2Name: string;
+  currentUserRole?: 'partner1' | 'partner2';
   spaceId?: string;
 }
 
 export const CoupleGames: React.FC<CoupleGamesProps> = ({
   partner1Name,
   partner2Name,
+  currentUserRole = 'partner1',
   spaceId = 'LOVE-2024',
 }) => {
   const [activeGame, setActiveGame] = useState<
-    'catch_word' | 'word_chain' | 'pet' | 'wheel' | 'xo' | 'quiz'
+    'catch_word' | 'word_chain' | 'pet' | 'xo' | 'wheel' | 'quiz'
   >('catch_word');
 
   // GAME: LOVE WHEEL STATE
@@ -65,66 +68,6 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
         colors: ['#ff4d6d', '#ff758f', '#c9184a', '#ffd166'],
       });
     }, 3200);
-  };
-
-  // GAME: TIC-TAC-TOE (LOVE XO) STATE
-  const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
-  const [scoreP1, setScoreP1] = useState(0);
-  const [scoreP2, setScoreP2] = useState(0);
-  const [winner, setWinner] = useState<string | null>(null);
-
-  const checkWinner = (squares: (string | null)[]) => {
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6],
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-        return squares[a];
-      }
-    }
-    if (squares.every((sq) => sq !== null)) return 'Draw';
-    return null;
-  };
-
-  const handleSquareClick = (index: number) => {
-    if (board[index] || winner) return;
-
-    const newBoard = [...board];
-    const mark = isXNext ? '❤️' : '💋';
-    newBoard[index] = mark;
-    setBoard(newBoard);
-
-    const win = checkWinner(newBoard);
-    if (win) {
-      setWinner(win);
-      if (win === '❤️') {
-        setScoreP1((prev) => prev + 1);
-      } else if (win === '💋') {
-        setScoreP2((prev) => prev + 1);
-      }
-      confetti({
-        particleCount: 40,
-        spread: 60,
-        origin: { y: 0.6 },
-      });
-    } else {
-      setIsXNext(!isXNext);
-    }
-  };
-
-  const resetXO = () => {
-    setBoard(Array(9).fill(null));
-    setWinner(null);
-    setIsXNext(true);
   };
 
   // GAME: COUPLE QUIZ
@@ -188,7 +131,7 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
             </h2>
           </div>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Các trò chơi tương tác gắn kết tình cảm: Đuổi hình bắt chữ, Nối từ, Nuôi thú cưng, Vòng quay, Caro và Thấu hiểu
+            Đuổi hình bắt chữ, Nối từ tình cảm, Nuôi thú cưng chuẩn xịn, Cờ Caro đa dạng bàn chơi, Vòng quay thử thách
           </p>
         </div>
 
@@ -202,7 +145,7 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
                 : 'text-zinc-600 dark:text-zinc-300 hover:text-rose-500'
             }`}
           >
-            <span>🧩 Đuổi Hình Bắt Chữ</span>
+            <span>🧩 Bắt Chữ</span>
           </button>
 
           <button
@@ -213,7 +156,7 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
                 : 'text-zinc-600 dark:text-zinc-300 hover:text-pink-500'
             }`}
           >
-            <span>🔗 Nối Từ Tình Yêu</span>
+            <span>🔗 Nối Từ</span>
           </button>
 
           <button
@@ -228,6 +171,17 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveGame('xo')}
+            className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              activeGame === 'xo'
+                ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-xs'
+                : 'text-zinc-600 dark:text-zinc-300 hover:text-rose-500'
+            }`}
+          >
+            <span>❌⭕ Cờ Caro</span>
+          </button>
+
+          <button
             onClick={() => setActiveGame('wheel')}
             className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${
               activeGame === 'wheel'
@@ -236,17 +190,6 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
             }`}
           >
             Vòng Quay 🎡
-          </button>
-
-          <button
-            onClick={() => setActiveGame('xo')}
-            className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all ${
-              activeGame === 'xo'
-                ? 'bg-rose-500 text-white shadow-xs'
-                : 'text-zinc-600 dark:text-zinc-300'
-            }`}
-          >
-            Caro XO ❌⭕
           </button>
 
           <button
@@ -267,6 +210,7 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
         <CoupleCatchWordGame
           partner1Name={partner1Name}
           partner2Name={partner2Name}
+          currentUserRole={currentUserRole}
           spaceId={spaceId}
         />
       )}
@@ -276,20 +220,32 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
         <CoupleWordChainGame
           partner1Name={partner1Name}
           partner2Name={partner2Name}
+          currentUserRole={currentUserRole}
           spaceId={spaceId}
         />
       )}
 
-      {/* GAME 3: NUÔI THÚ CƯNG ĐÔI (CHÓ & MÈO) */}
+      {/* GAME 3: NUÔI THÚ CƯNG ĐÔI (CHÓ & MÈO XỊN) */}
       {activeGame === 'pet' && (
         <CouplePetGame
           partner1Name={partner1Name}
           partner2Name={partner2Name}
+          currentUserRole={currentUserRole}
           spaceId={spaceId}
         />
       )}
 
-      {/* GAME 4: VÒNG QUAY TÌNH YÊU */}
+      {/* GAME 4: CỜ CARO TÌNH YÊU ĐA BÀN CHƠI & LƯỢT CHUẨN */}
+      {activeGame === 'xo' && (
+        <CoupleCaroGame
+          partner1Name={partner1Name}
+          partner2Name={partner2Name}
+          currentUserRole={currentUserRole}
+          spaceId={spaceId}
+        />
+      )}
+
+      {/* GAME 5: VÒNG QUAY TÌNH YÊU */}
       {activeGame === 'wheel' && (
         <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 p-6 sm:p-8 text-center space-y-6">
           <div>
@@ -344,74 +300,6 @@ export const CoupleGames: React.FC<CoupleGamesProps> = ({
               </p>
             </div>
           )}
-        </div>
-      )}
-
-      {/* GAME 5: TIC-TAC-TOE */}
-      {activeGame === 'xo' && (
-        <div className="rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 p-6 sm:p-8 text-center space-y-6">
-          <div>
-            <h3 className="font-bold text-base text-zinc-900 dark:text-zinc-100 flex items-center justify-center gap-1.5">
-              <Heart className="w-4 h-4 text-rose-500 fill-rose-500" />
-              Cờ Caro Tình Yêu (Tim ❤️ vs Nụ Hôn 💋)
-            </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-              {partner1Name} là Trái Tim ❤️, {partner2Name} là Nụ Hôn 💋
-            </p>
-          </div>
-
-          {/* Scoreboard */}
-          <div className="flex items-center justify-center gap-6 max-w-xs mx-auto p-3 rounded-2xl bg-rose-50/60 dark:bg-zinc-800 border border-rose-200 dark:border-zinc-700">
-            <div className="text-center">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">{partner1Name} (❤️)</span>
-              <span className="text-xl font-mono font-bold text-rose-600">{scoreP1}</span>
-            </div>
-            <span className="text-xs font-bold text-zinc-400">VS</span>
-            <div className="text-center">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 block">{partner2Name} (💋)</span>
-              <span className="text-xl font-mono font-bold text-pink-600">{scoreP2}</span>
-            </div>
-          </div>
-
-          <div className="text-xs font-semibold">
-            {winner ? (
-              <span className="text-rose-600 font-bold text-sm">
-                {winner === 'Draw'
-                  ? 'Hòa nhau rồi! Hai bạn đều quá đáng yêu 💕'
-                  : `🎉 ${winner === '❤️' ? partner1Name : partner2Name} đã chiến thắng!`}
-              </span>
-            ) : (
-              <span className="text-zinc-600 dark:text-zinc-400">
-                Lượt của:{' '}
-                <strong className="text-rose-500">
-                  {isXNext ? `${partner1Name} (❤️)` : `${partner2Name} (💋)`}
-                </strong>
-              </span>
-            )}
-          </div>
-
-          {/* 3x3 Grid Board */}
-          <div className="grid grid-cols-3 gap-2.5 max-w-[260px] sm:max-w-[280px] mx-auto">
-            {board.map((cell, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSquareClick(idx)}
-                className="aspect-square rounded-2xl bg-zinc-50 dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 text-3xl sm:text-4xl flex items-center justify-center hover:bg-rose-50 dark:hover:bg-zinc-700 active:scale-95 transition-all shadow-xs"
-              >
-                {cell}
-              </button>
-            ))}
-          </div>
-
-          <div className="pt-2">
-            <button
-              onClick={resetXO}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-bold hover:bg-zinc-200 transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>Chơi Lại Ván Mới</span>
-            </button>
-          </div>
         </div>
       )}
 

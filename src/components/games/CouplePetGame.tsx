@@ -14,6 +14,10 @@ import {
   Plus,
   Shirt,
   Volume2,
+  Coins,
+  Play,
+  Gamepad2,
+  Sparkle,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CouplePetData } from '../../types';
@@ -26,27 +30,34 @@ interface CouplePetGameProps {
 }
 
 const DOG_BREEDS = [
-  { id: 'corgi', name: 'Corgi Mông Đào', icon: '🐕', trait: 'Nhanh nhẹn, mông tròn lúc lắc' },
-  { id: 'shiba', name: 'Shiba Inu Cười Mỉm', icon: '🐶', trait: 'Trung thành, biết cười đáng yêu' },
-  { id: 'golden', name: 'Golden Dịu Dàng', icon: '🦮', trait: 'Ấm áp, thích được ôm ấp' },
-  { id: 'poodle', name: 'Poodle Xoăn Xù', icon: '🐩', trait: 'Thông minh, điệu đà' },
+  { id: 'corgi', name: 'Corgi Mông Đào', icon: '🐕', trait: 'Nhanh nhẹn, mông tròn lúc lắc', color: '#f59e0b' },
+  { id: 'shiba', name: 'Shiba Inu Cười Mỉm', icon: '🐶', trait: 'Trung thành, biết cười đáng yêu', color: '#d97706' },
+  { id: 'golden', name: 'Golden Dịu Dàng', icon: '🦮', trait: 'Ấm áp, thích được ôm ấp', color: '#fbbf24' },
+  { id: 'poodle', name: 'Poodle Xoăn Xù', icon: '🐩', trait: 'Thông minh, điệu đà', color: '#92400e' },
 ];
 
 const CAT_BREEDS = [
-  { id: 'british', name: 'Mèo Anh Lông Ngắn', icon: '🐱', trait: 'Má phính, thích nằm lười' },
-  { id: 'tabby', name: 'Mèo Mướp Tinh Nghịch', icon: '🐈', trait: 'Nhanh nhẹn, săn bướm' },
-  { id: 'persian', name: 'Mèo Ba Tư Quý Tộc', icon: '🤍', trait: 'Bộ lông bồng bềnh, kiêu kỳ' },
-  { id: 'calico', name: 'Mèo Tam Thể May Mắn', icon: '🧶', trait: 'Mang tài lộc & tình yêu' },
+  { id: 'british', name: 'Mèo Anh Lông Ngắn', icon: '🐱', trait: 'Má phính, thích nằm lười', color: '#94a3b8' },
+  { id: 'tabby', name: 'Mèo Mướp Tinh Nghịch', icon: '🐈', trait: 'Nhanh nhẹn, săn bướm', color: '#e2e8f0' },
+  { id: 'persian', name: 'Mèo Ba Tư Quý Tộc', icon: '🤍', trait: 'Bộ lông bồng bềnh, kiêu kỳ', color: '#cbd5e1' },
+  { id: 'calico', name: 'Mèo Tam Thể May Mắn', icon: '🧶', trait: 'Mang tài lộc & tình yêu', color: '#fb923c' },
 ];
 
 const ACCESSORIES = [
   { id: 'none', name: 'Tự nhiên', icon: '🌱' },
-  { id: 'bow', name: 'Nơ Hồng', icon: '🎀' },
+  { id: 'bow', name: 'Nơ Hồng Quý Tộc', icon: '🎀' },
+  { id: 'crown', name: 'Vương Miện Vàng', icon: '👑' },
+  { id: 'sunglasses', name: 'Kính Râm Cực Ngầu', icon: '😎' },
   { id: 'party_hat', name: 'Mũ Sinh Nhật', icon: '🥳' },
-  { id: 'sunglasses', name: 'Kính Râm Ngầu', icon: '😎' },
-  { id: 'bell', name: 'Chuông Vàng', icon: '🔔' },
-  { id: 'crown', name: 'Vương Miện', icon: '👑' },
-  { id: 'flower', name: 'Hoa Cài Tai', icon: '🌸' },
+  { id: 'bell', name: 'Chuông Vàng Leng Keng', icon: '🔔' },
+  { id: 'flower', name: 'Hoa Cài Đáng Yêu', icon: '🌸' },
+];
+
+const GOURMET_FOODS = [
+  { id: 'f1', name: 'Pate Cá Hồi Tươi', icon: '🐟', hunger: 30, happiness: 15, cost: 5 },
+  { id: 'f2', name: 'Xúc Xích Phô Mai', icon: '🌭', hunger: 35, happiness: 10, cost: 5 },
+  { id: 'f3', name: 'Bánh Quy Bơ Sữa', icon: '🍪', hunger: 20, happiness: 25, cost: 8 },
+  { id: 'f4', name: 'Bữa Tiệc Thịt Bò Hầm', icon: '🥩', hunger: 50, happiness: 40, cost: 15 },
 ];
 
 export const CouplePetGame: React.FC<CouplePetGameProps> = ({
@@ -57,14 +68,13 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
 }) => {
   const currentUserName = currentUserRole === 'partner1' ? partner1Name : partner2Name;
   const petStorageKey = `foreverus_pet_${spaceId}`;
+  const coinsStorageKey = `foreverus_pet_coins_${spaceId}`;
 
   const [pet, setPet] = useState<CouplePetData>(() => {
     try {
       const saved = localStorage.getItem(petStorageKey);
       if (saved) return JSON.parse(saved);
-    } catch {
-      // ignore
-    }
+    } catch {}
     return {
       type: 'cat',
       breed: 'Mèo Anh Lông Ngắn',
@@ -73,35 +83,91 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
       exp: 40,
       hunger: 80,
       happiness: 85,
-      cleanliness: 70,
+      cleanliness: 75,
       energy: 90,
       accessory: 'bow',
       careLogs: [
         `${partner1Name} vừa nhận nuôi bé cưng cùng ${partner2Name}! 💕`,
       ],
-      learnedTricks: ['Bắt tay 🐾', 'Nằm ngửa khoe bụng 🥰'],
+      learnedTricks: ['Bắt tay đôi lứa 🐾', 'Nằm ngửa khoe bụng 🥰'],
     };
+  });
+
+  // Love Coins
+  const [loveCoins, setLoveCoins] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(coinsStorageKey);
+      if (saved) return Number(saved);
+    } catch {}
+    return 100;
   });
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(pet.name);
   const [petMoodAction, setPetMoodAction] = useState<string | null>(null);
   const [isSleeping, setIsSleeping] = useState(false);
+  const [isPlayingCatch, setIsPlayingCatch] = useState(false);
+  const [toyPosition, setToyPosition] = useState<{ x: number; y: number } | null>(null);
 
-  // Save pet state
+  // Sound synthesizer for pet voice
+  const playPetSound = (type: 'meow' | 'bark' | 'purr' | 'eat' | 'water') => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      if (type === 'meow') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, audioCtx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(500, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } else if (type === 'bark') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(350, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } else {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      }
+    } catch {}
+  };
+
+  // Sync state to local storage
   useEffect(() => {
     localStorage.setItem(petStorageKey, JSON.stringify(pet));
   }, [pet, petStorageKey]);
 
+  useEffect(() => {
+    localStorage.setItem(coinsStorageKey, String(loveCoins));
+  }, [loveCoins, coinsStorageKey]);
+
   const triggerReaction = (msg: string, emoji: string) => {
     setPetMoodAction(`${emoji} ${msg}`);
     confetti({
-      particleCount: 30,
-      spread: 50,
+      particleCount: 35,
+      spread: 60,
       origin: { y: 0.5 },
       colors: ['#ff4d6d', '#ff758f', '#ffd166', '#a855f7'],
     });
-    setTimeout(() => setPetMoodAction(null), 3000);
+    setTimeout(() => setPetMoodAction(null), 3200);
   };
 
   const addExp = (amount: number, logMsg: string) => {
@@ -113,10 +179,14 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
     if (nextExp >= maxExp) {
       nextLevel += 1;
       finalExp = nextExp - maxExp;
-      triggerReaction(`🎉 ${pet.name} đã lên Cấp ${nextLevel}! Trông bé lớn phổng phao và đáng yêu hơn!`, '🌟');
+      triggerReaction(
+        `🎉 ${pet.name} đã lên Cấp ${nextLevel}! Trông bé lớn phổng phao và đáng yêu hơn!`,
+        '🌟'
+      );
+      setLoveCoins((c) => c + 30);
     }
 
-    const updatedLogs = [logMsg, ...pet.careLogs.slice(0, 7)];
+    const updatedLogs = [logMsg, ...pet.careLogs.slice(0, 8)];
 
     setPet((prev) => ({
       ...prev,
@@ -127,21 +197,27 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
   };
 
   // 1. Feed Pet
-  const handleFeed = (foodName: string, hungerBoost: number) => {
+  const handleFeedGourmet = (food: typeof GOURMET_FOODS[0]) => {
     if (isSleeping) {
       triggerReaction('Bé đang ngủ say sưa, đừng đánh thức bé nhé!', '💤');
       return;
     }
-    const newHunger = Math.min(100, pet.hunger + hungerBoost);
-    const newHappiness = Math.min(100, pet.happiness + 10);
+    playPetSound(pet.type === 'cat' ? 'meow' : 'bark');
+
+    const newHunger = Math.min(100, pet.hunger + food.hunger);
+    const newHappiness = Math.min(100, pet.happiness + food.happiness);
     setPet((prev) => ({
       ...prev,
       hunger: newHunger,
       happiness: newHappiness,
       lastFedBy: currentUserName,
     }));
-    triggerReaction(`${currentUserName} vừa cho ${pet.name} ăn ${foodName}! Bé măm măm ngon lành!`, '🍖');
-    addExp(15, `${currentUserName} cho ăn ${foodName} (+15 EXP)`);
+    triggerReaction(
+      `${currentUserName} vừa cho ${pet.name} ăn ${food.name}! Bé măm măm ngon lành!`,
+      food.icon
+    );
+    addExp(20, `${currentUserName} cho ăn ${food.name} (+20 EXP)`);
+    setLoveCoins((c) => c + 5);
   };
 
   // 2. Pet / Cuddle (Vuốt ve)
@@ -150,18 +226,30 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
       triggerReaction('Bé đang ngủ ngoan, bạn vuốt nhẹ đầu bé khẽ rên ừ ừ...', '💤');
       return;
     }
+    playPetSound(pet.type === 'cat' ? 'meow' : 'bark');
+
     const newHappiness = Math.min(100, pet.happiness + 20);
     setPet((prev) => ({
       ...prev,
       happiness: newHappiness,
       lastPlayedBy: currentUserName,
     }));
-    triggerReaction(`${currentUserName} xoa bụng và gãi cằm cho ${pet.name}! Bé thích thú lăn lộn!`, '🥰');
-    addExp(10, `${currentUserName} cưng nựng bé (+10 EXP)`);
+    triggerReaction(
+      `${currentUserName} gãi cằm và xoa bụng ${pet.name}! Bé thích thú dụi đầu vào tay bạn!`,
+      '🥰'
+    );
+    addExp(15, `${currentUserName} cưng nựng bé (+15 EXP)`);
+    setLoveCoins((c) => c + 3);
   };
 
   // 3. Bath (Tắm rửa)
   const handleBath = () => {
+    if (isSleeping) {
+      triggerReaction('Bé đang ngủ, hãy để lúc bé thức dậy rồi tắm nhé!', '💤');
+      return;
+    }
+    playPetSound('water');
+
     const newCleanliness = 100;
     const newHappiness = Math.min(100, pet.happiness + 15);
     setPet((prev) => ({
@@ -170,8 +258,12 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
       happiness: newHappiness,
       lastBathedBy: currentUserName,
     }));
-    triggerReaction(`${currentUserName} vừa tắm bọt xà phòng bong bóng cho ${pet.name}! Lông bé thơm tho mượt mà!`, '🫧');
-    addExp(20, `${currentUserName} tắm gội cho bé (+20 EXP)`);
+    triggerReaction(
+      `${currentUserName} tắm bọt xà phòng thơm lừng cho ${pet.name}! Lông bé trắng mượt tinh tươm!`,
+      '🫧'
+    );
+    addExp(25, `${currentUserName} tắm gội cho bé (+25 EXP)`);
+    setLoveCoins((c) => c + 5);
   };
 
   // 4. Sleep toggle
@@ -188,18 +280,38 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
     }
   };
 
-  // 5. Teach Trick
-  const handleTeachTrick = (trickName: string) => {
-    if (pet.learnedTricks.includes(trickName)) {
-      triggerReaction(`${pet.name} biểu diễn chiêu "${trickName}" cực điêu luyện trước mặt hai bạn!`, '👏');
+  // 5. Interactive Ball / Toy Catch Mini-Game
+  const handlePlayCatch = (toyName: string, toyEmoji: string) => {
+    if (isSleeping) {
+      triggerReaction('Bé đang ngủ, hãy đánh thức bé dậy trước khi chơi ném bóng nhé!', '💤');
       return;
     }
-    setPet((prev) => ({
-      ...prev,
-      learnedTricks: [...prev.learnedTricks, trickName],
-    }));
-    triggerReaction(`🎉 Tuyệt vời! ${pet.name} vừa học được chiêu mới: "${trickName}"!`, '🎓');
-    addExp(30, `${currentUserName} dạy chiêu "${trickName}" (+30 EXP)`);
+    if (isPlayingCatch) return;
+
+    setIsPlayingCatch(true);
+    setToyPosition({ x: 70, y: 30 });
+    playPetSound(pet.type === 'cat' ? 'meow' : 'bark');
+
+    setTimeout(() => {
+      setToyPosition(null);
+      setIsPlayingCatch(false);
+
+      const newHappiness = Math.min(100, pet.happiness + 25);
+      const newEnergy = Math.max(10, pet.energy - 10);
+      setPet((prev) => ({
+        ...prev,
+        happiness: newHappiness,
+        energy: newEnergy,
+        lastPlayedBy: currentUserName,
+      }));
+
+      triggerReaction(
+        `🎾 Vèo! ${pet.name} nhảy phốc lên bắt gọn ${toyName} do ${currentUserName} ném! (+10 Xu Tình Yêu)`,
+        toyEmoji
+      );
+      addExp(30, `${currentUserName} ném ${toyName} cho bé bắt (+30 EXP)`);
+      setLoveCoins((c) => c + 10);
+    }, 1800);
   };
 
   // 6. Switch Species (Dog <-> Cat)
@@ -213,7 +325,8 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
       name: defaultName,
     }));
     setNameInput(defaultName);
-    triggerReaction(`Hai bạn đã chọn nuôi ${newType === 'dog' ? 'Cún Cưng 🐶' : 'Mèo Con 🐱'}!`, '✨');
+    playPetSound(newType === 'cat' ? 'meow' : 'bark');
+    triggerReaction(`Hai bạn đã nhận nuôi một bé ${newType === 'dog' ? 'Cún Cưng 🐶' : 'Mèo Con 🐱'}!`, '✨');
   };
 
   const handleSaveName = (e: React.FormEvent) => {
@@ -224,23 +337,11 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
     triggerReaction(`Đã đổi tên bé cưng thành "${nameInput.trim()}"!`, '🏷️');
   };
 
-  // Pet avatar visual
-  const getPetEmoji = () => {
-    if (isSleeping) return '😴';
-    if (pet.type === 'dog') {
-      const match = DOG_BREEDS.find((b) => b.name === pet.breed);
-      return match ? match.icon : '🐶';
-    } else {
-      const match = CAT_BREEDS.find((b) => b.name === pet.breed);
-      return match ? match.icon : '🐱';
-    }
-  };
-
   const getPetTitle = () => {
     if (pet.level === 1) return 'Bé Cưng Sơ Sinh 🍼';
     if (pet.level === 2) return 'Nhóc Tinh Nghịch 🐾';
-    if (pet.level === 3) return 'Bé Trưởng Thành Năng Động 🌟';
-    return 'Thú Cưng Hoàng Gia Siêu Ngoan 👑';
+    if (pet.level === 3) return 'Bé Năng Động Trưởng Thành 🌟';
+    return 'Thần Thú Tình Yêu Hoàng Gia 👑';
   };
 
   return (
@@ -253,12 +354,14 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
       )}
 
       {/* Main Pet Sanctuary Stage */}
-      <div className={`p-6 sm:p-8 rounded-3xl border-2 transition-all duration-500 relative overflow-hidden shadow-lg ${
-        isSleeping
-          ? 'bg-gradient-to-b from-indigo-950 via-zinc-900 to-slate-950 border-indigo-900 text-white'
-          : 'bg-gradient-to-b from-pink-100/90 via-rose-50 to-amber-50/70 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 border-rose-200/80 dark:border-zinc-800'
-      }`}>
-        {/* Floating Stars / Zzz when sleeping */}
+      <div
+        className={`p-6 sm:p-8 rounded-3xl border-2 transition-all duration-700 relative overflow-hidden shadow-xl ${
+          isSleeping
+            ? 'bg-gradient-to-b from-indigo-950 via-slate-900 to-zinc-950 border-indigo-900 text-white'
+            : 'bg-gradient-to-b from-pink-100/90 via-rose-50 to-amber-50/70 dark:from-zinc-900 dark:via-zinc-900 dark:to-zinc-950 border-rose-200/80 dark:border-zinc-800'
+        }`}
+      >
+        {/* Floating Stars & Zzz when sleeping */}
         {isSleeping && (
           <div className="absolute inset-0 pointer-events-none flex justify-around items-start pt-6 opacity-60">
             <span className="text-xl animate-bounce">💤</span>
@@ -268,7 +371,7 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
           </div>
         )}
 
-        {/* Top Info Bar: Species Switcher & Name */}
+        {/* Top Info Bar: Species Switcher, Name, Coins */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-rose-200/60 dark:border-zinc-800 relative z-10">
           <div className="flex items-center gap-3">
             {/* Dog or Cat Switcher */}
@@ -336,57 +439,95 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
             </div>
           </div>
 
-          {/* Level & Parents Badge */}
+          {/* Level, Parents & Love Coins */}
           <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-xs font-bold text-amber-700 dark:text-amber-300">
+              <Coins className="w-3.5 h-3.5 text-amber-500" />
+              <span>{loveCoins} Xu</span>
+            </div>
+
             <div className="px-3 py-1 rounded-full bg-rose-500/10 border border-rose-300 dark:border-zinc-700 text-xs font-bold text-rose-600 dark:text-rose-400">
               Cấp {pet.level} (Lv.{pet.level})
-            </div>
-            <div className="px-2.5 py-1 rounded-full bg-white/70 dark:bg-zinc-800 text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700">
-              Bố mẹ: {partner1Name.split(' ')[0]} & {partner2Name.split(' ')[0]}
             </div>
           </div>
         </div>
 
-        {/* Pet Stage Graphic */}
+        {/* Dynamic Animated Pet Visual Stage */}
         <div className="my-8 flex flex-col items-center justify-center text-center relative z-10">
+          {/* Flying Toy in Mini-Game */}
+          {toyPosition && (
+            <div
+              className="absolute text-3xl z-30 transition-all duration-1000 animate-bounce"
+              style={{
+                top: `${toyPosition.y}%`,
+                left: `${toyPosition.x}%`,
+              }}
+            >
+              🎾
+            </div>
+          )}
+
           <div
             onClick={handlePetCuddle}
-            title="Chạm vào bé để vuốt ve và cưng nựng!"
+            title="Chạm vào bé để vuốt ve và nghe tiếng kêu đáng yêu!"
             className="cursor-pointer group relative inline-flex items-center justify-center transition-transform hover:scale-105 active:scale-95"
           >
-            {/* Background Halo glow */}
-            <div className="absolute w-36 h-36 rounded-full bg-gradient-to-tr from-pink-400/30 to-purple-400/30 blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
+            {/* Background Halo Glow */}
+            <div className="absolute w-48 h-48 rounded-full bg-gradient-to-tr from-pink-400/30 via-rose-300/30 to-purple-400/30 blur-2xl pointer-events-none group-hover:scale-125 transition-transform" />
 
-            {/* Accessory Tag */}
+            {/* Accessory On Pet */}
             {pet.accessory && pet.accessory !== 'none' && (
-              <span className="absolute -top-3 text-3xl animate-bounce drop-shadow-md z-20">
+              <span className="absolute -top-4 text-4xl animate-bounce drop-shadow-md z-20">
                 {ACCESSORIES.find((a) => a.id === pet.accessory)?.icon}
               </span>
             )}
 
-            {/* Pet Main Emoji Graphic */}
-            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-white/80 dark:bg-zinc-800/80 shadow-2xl border-4 border-rose-300 dark:border-rose-900/60 flex items-center justify-center text-7xl sm:text-8xl select-none relative overflow-hidden backdrop-blur-xs">
-              <span className="drop-shadow-lg group-hover:animate-pulse">
-                {getPetEmoji()}
-              </span>
+            {/* Custom High-Fidelity Animated Pet Container */}
+            <div
+              className={`w-40 h-40 sm:w-48 sm:h-48 rounded-full shadow-2xl border-4 flex flex-col items-center justify-center relative overflow-hidden backdrop-blur-xs select-none transition-all duration-500 ${
+                isSleeping
+                  ? 'bg-indigo-900/60 border-indigo-700'
+                  : 'bg-white/90 dark:bg-zinc-800/90 border-rose-300 dark:border-rose-900/60'
+              } ${isPlayingCatch ? 'animate-bounce' : ''}`}
+            >
+              {/* Pet Animated Character Graphic */}
+              <div className="relative flex flex-col items-center justify-center">
+                {/* Pet Big Animated Face */}
+                <div className="text-7xl sm:text-8xl transition-all duration-300 group-hover:scale-110 drop-shadow-md">
+                  {isSleeping
+                    ? '😴'
+                    : isPlayingCatch
+                    ? '🤩'
+                    : pet.type === 'dog'
+                    ? '🐶'
+                    : '🐱'}
+                </div>
+
+                {/* Floating love hearts animation */}
+                <div className="absolute -top-6 -right-2 text-rose-500 text-lg animate-ping opacity-60">
+                  💖
+                </div>
+              </div>
             </div>
 
-            {/* Cute interaction hint */}
-            <div className="absolute -bottom-2 px-3 py-0.5 rounded-full bg-rose-500 text-white font-bold text-[10px] shadow-md flex items-center gap-1 animate-pulse">
+            {/* Cute interaction badge */}
+            <div className="absolute -bottom-2 px-3 py-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold text-[10px] shadow-md flex items-center gap-1 group-hover:scale-105 transition-transform">
               <Heart className="w-3 h-3 fill-white" />
-              <span>Chạm để vuốt ve cưng nựng</span>
+              <span>Chạm để nựng bé & nghe tiếng kêu</span>
             </div>
           </div>
 
-          {/* EXP Progress */}
-          <div className="w-full max-w-xs mt-6 space-y-1">
+          {/* EXP Progress Bar */}
+          <div className="w-full max-w-xs mt-7 space-y-1">
             <div className="flex justify-between text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">
-              <span>Độ lớn lên Cấp {pet.level + 1}</span>
-              <span>{pet.exp} / {pet.level * 100} EXP</span>
+              <span>Tiến độ lên Cấp {pet.level + 1}</span>
+              <span>
+                {pet.exp} / {pet.level * 100} EXP
+              </span>
             </div>
-            <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden">
+            <div className="w-full h-2.5 rounded-full bg-zinc-200 dark:bg-zinc-800 overflow-hidden shadow-inner">
               <div
-                className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-500 transition-all duration-500 rounded-full"
                 style={{ width: `${Math.min(100, (pet.exp / (pet.level * 100)) * 100)}%` }}
               />
             </div>
@@ -395,7 +536,7 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
 
         {/* 4 Pet Status Vital Bars */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 relative z-10">
-          {/* 1. Hunger */}
+          {/* Hunger */}
           <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 shadow-2xs space-y-1">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
               <span className="flex items-center gap-1">
@@ -413,7 +554,7 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
             </div>
           </div>
 
-          {/* 2. Happiness */}
+          {/* Happiness */}
           <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 shadow-2xs space-y-1">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
               <span className="flex items-center gap-1">
@@ -429,7 +570,7 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
             </div>
           </div>
 
-          {/* 3. Hygiene */}
+          {/* Cleanliness */}
           <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 shadow-2xs space-y-1">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
               <span className="flex items-center gap-1">
@@ -445,7 +586,7 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
             </div>
           </div>
 
-          {/* 4. Energy */}
+          {/* Energy */}
           <div className="p-3 rounded-2xl bg-white/80 dark:bg-zinc-800/80 border border-zinc-200/80 dark:border-zinc-700 shadow-2xs space-y-1">
             <div className="flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300">
               <span className="flex items-center gap-1">
@@ -463,20 +604,8 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
         </div>
       </div>
 
-      {/* Action Buttons Toolbar: Feeding, Bathing, Cuddling, Sleep */}
+      {/* Action Buttons Toolbar: Feeding, Bathing, Cuddling, Sleep, Catch Mini-Game */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        {/* Feed Button with Menu */}
-        <div className="relative group">
-          <button
-            type="button"
-            onClick={() => handleFeed(pet.type === 'cat' ? 'Pate Cá Hồi 🐟' : 'Xúc Xích Thơm 🌭', 25)}
-            className="w-full p-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-bold text-xs shadow-md shadow-amber-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all"
-          >
-            <Utensils className="w-4 h-4" />
-            <span>Cho Bé Ăn</span>
-          </button>
-        </div>
-
         {/* Bath Button */}
         <button
           type="button"
@@ -497,6 +626,17 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
           <span>Ôm & Cưng Nựng</span>
         </button>
 
+        {/* Play Catch Ball Mini-Game */}
+        <button
+          type="button"
+          onClick={() => handlePlayCatch('bóng tennis', '🎾')}
+          disabled={isPlayingCatch}
+          className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs shadow-md shadow-emerald-500/25 flex items-center justify-center gap-2 active:scale-95 transition-all disabled:opacity-50"
+        >
+          <Play className="w-4 h-4" />
+          <span>{isPlayingCatch ? 'Đang bắt bóng...' : 'Ném Bóng Cùng Bé 🎾'}</span>
+        </button>
+
         {/* Sleep Toggle Button */}
         <button
           type="button"
@@ -512,7 +652,35 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
         </button>
       </div>
 
-      {/* Breeds & Breed Selector */}
+      {/* Gourmet Food Menu */}
+      <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
+        <h4 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+          <Utensils className="w-4 h-4 text-amber-500" />
+          <span>Thực Đơn Món Ngon Cho Bé:</span>
+        </h4>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {GOURMET_FOODS.map((food) => (
+            <button
+              key={food.id}
+              onClick={() => handleFeedGourmet(food)}
+              className="p-3 rounded-2xl border border-zinc-200 dark:border-zinc-750 bg-zinc-50/70 dark:bg-zinc-800/60 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-zinc-700/60 transition-all text-left group"
+            >
+              <div className="text-2xl group-hover:scale-110 transition-transform mb-1">
+                {food.icon}
+              </div>
+              <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 block truncate">
+                {food.name}
+              </span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold block mt-0.5">
+                +{food.hunger}% No • +{food.happiness}% Vui
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Breeds Selector */}
       <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
         <h4 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
           <Smile className="w-4 h-4 text-rose-500" />
@@ -581,55 +749,41 @@ export const CouplePetGame: React.FC<CouplePetGameProps> = ({
         </div>
       </div>
 
-      {/* Tricks Academy & Care Logs */}
+      {/* Dual Parenting Stats & Care Logs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Tricks Academy */}
-        <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
+        {/* Parenting Summary */}
+        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
           <h4 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
             <Award className="w-4 h-4 text-amber-500" />
-            <span>Lớp Dạy Chiêu Đáng Yêu:</span>
+            <span>Thống Kê Chăm Sóc Đôi Lứa:</span>
           </h4>
 
-          <div className="space-y-1.5">
-            {[
-              { name: 'Bắt tay đôi lứa 🐾', cost: 1 },
-              { name: 'Xoay tròn đón chào 🔄', cost: 2 },
-              { name: 'Giả chết ăn vạ 😵', cost: 2 },
-              { name: 'Hôn má thơm nồng 😘', cost: 3 },
-            ].map((trick, i) => {
-              const isLearned = pet.learnedTricks.includes(trick.name);
-              return (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700/80 text-xs"
-                >
-                  <span className="font-semibold text-zinc-800 dark:text-zinc-200">
-                    {trick.name}
-                  </span>
-                  <button
-                    onClick={() => handleTeachTrick(trick.name)}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
-                      isLearned
-                        ? 'bg-emerald-500 text-white'
-                        : 'bg-rose-500 hover:bg-rose-600 text-white'
-                    }`}
-                  >
-                    {isLearned ? 'Biểu diễn 👏' : 'Dạy bé học'}
-                  </button>
-                </div>
-              );
-            })}
+          <div className="space-y-2 text-xs">
+            <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 flex items-center justify-between">
+              <span className="text-zinc-600 dark:text-zinc-400">🍖 Cho ăn gần nhất:</span>
+              <span className="font-bold text-rose-600">{pet.lastFedBy || partner1Name}</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 flex items-center justify-between">
+              <span className="text-zinc-600 dark:text-zinc-400">🧼 Tắm rửa gần nhất:</span>
+              <span className="font-bold text-sky-600">{pet.lastBathedBy || partner2Name}</span>
+            </div>
+
+            <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-800/60 border border-zinc-200/80 dark:border-zinc-700 flex items-center justify-between">
+              <span className="text-zinc-600 dark:text-zinc-400">🎾 Vui chơi gần nhất:</span>
+              <span className="font-bold text-emerald-600">{pet.lastPlayedBy || currentUserName}</span>
+            </div>
           </div>
         </div>
 
         {/* Care Logs */}
-        <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
+        <div className="p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-rose-100 dark:border-zinc-800 space-y-3">
           <h4 className="font-bold text-xs sm:text-sm text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
             <Sparkles className="w-4 h-4 text-rose-500" />
-            <span>Nhật Ký Chăm Sóc Của Hai Bạn:</span>
+            <span>Nhật Ký Kỷ Niệm Cùng Bé:</span>
           </h4>
 
-          <div className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-400 max-h-48 overflow-y-auto">
+          <div className="space-y-1.5 text-xs text-zinc-600 dark:text-zinc-400 max-h-44 overflow-y-auto">
             {pet.careLogs.map((log, idx) => (
               <div
                 key={idx}
