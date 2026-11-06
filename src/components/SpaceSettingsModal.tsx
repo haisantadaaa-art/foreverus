@@ -606,6 +606,44 @@ export const SpaceSettingsModal: React.FC<SpaceSettingsModalProps> = ({
             </div>
           </div>
 
+          {/* App Update & Force Refresh */}
+          <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  Cập Nhật Bản Mới Nhất & Xóa Bộ Nhớ Đệm:
+                </label>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Nếu vừa có tính năng mới cập nhật, bấm vào đây để làm mới bộ nhớ đệm và tải mã mới nhất ngay.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    if ('caches' in window) {
+                      const keys = await caches.keys();
+                      await Promise.all(keys.map((k) => caches.delete(k)));
+                    }
+                    if ('serviceWorker' in navigator) {
+                      const regs = await navigator.serviceWorker.getRegistrations();
+                      for (const reg of regs) {
+                        reg.active?.postMessage({ type: 'CLEAR_CACHE' });
+                        reg.active?.postMessage({ type: 'SKIP_WAITING' });
+                        await reg.update().catch(() => {});
+                      }
+                    }
+                  } catch {}
+                  window.location.href = window.location.pathname + '?v=' + Date.now();
+                }}
+                className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0 transition-colors shadow-xs"
+              >
+                Làm mới ngay 🔄
+              </button>
+            </div>
+          </div>
+
           {/* Form Actions */}
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
             <button

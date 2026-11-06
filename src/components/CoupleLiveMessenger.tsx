@@ -219,16 +219,37 @@ export const CoupleLiveMessenger: React.FC<CoupleLiveMessengerProps> = ({
   const handleStartRecording = async () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Trình duyệt của bạn không hỗ trợ ghi âm trực tiếp. Hãy kiểm tra quyền micro nhé!');
+        handleSendSimulatedVoiceNote();
         return;
       }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunksRef.current = [];
-      const mediaRecorder = new MediaRecorder(stream);
+
+      let mimeType = '';
+      if (typeof MediaRecorder.isTypeSupported === 'function') {
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+          mimeType = 'audio/aac';
+        }
+      }
+
+      const options: MediaRecorderOptions = {
+        audioBitsPerSecond: 16000,
+      };
+      if (mimeType) {
+        options.mimeType = mimeType;
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, options);
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
+        if (event.data && event.data.size > 0) {
           audioChunksRef.current.push(event.data);
         }
       };
@@ -237,16 +258,21 @@ export const CoupleLiveMessenger: React.FC<CoupleLiveMessengerProps> = ({
         stream.getTracks().forEach((track) => track.stop());
       };
 
-      mediaRecorder.start(200);
+      mediaRecorder.start(250);
       setIsRecording(true);
       setRecordSeconds(0);
 
       recordTimerRef.current = setInterval(() => {
-        setRecordSeconds((s) => s + 1);
+        setRecordSeconds((s) => {
+          if (s >= 25) {
+            handleStopAndSendRecording();
+            return 25;
+          }
+          return s + 1;
+        });
       }, 1000);
     } catch (err) {
       console.warn('Microphone permission denied or unavailable:', err);
-      // Fallback: send sweet simulated voice note if user denied mic
       handleSendSimulatedVoiceNote();
     }
   };
@@ -258,9 +284,10 @@ export const CoupleLiveMessenger: React.FC<CoupleLiveMessengerProps> = ({
 
     const seconds = Math.max(1, recordSeconds);
     const mediaRecorder = mediaRecorderRef.current;
+    const recordedMime = mediaRecorder.mimeType || 'audio/webm';
 
     mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const audioBlob = new Blob(audioChunksRef.current, { type: recordedMime });
       const reader = new FileReader();
       reader.onloadend = () => {
         const base64Audio = reader.result as string;
@@ -283,7 +310,9 @@ export const CoupleLiveMessenger: React.FC<CoupleLiveMessengerProps> = ({
       reader.readAsDataURL(audioBlob);
     };
 
-    mediaRecorder.stop();
+    if (mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
     setIsRecording(false);
     setRecordSeconds(0);
   };

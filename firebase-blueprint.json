@@ -104,7 +104,7 @@
         "senderRole": { "type": "string", "maxLength": 20 },
         "content": { "type": "string", "maxLength": 2000 },
         "imageUrl": { "type": "string", "maxLength": 200000 },
-        "audioUrl": { "type": "string", "maxLength": 300000 },
+        "audioUrl": { "type": "string", "maxLength": 500000 },
         "sticker": { "type": "string", "maxLength": 50 },
         "isVoice": { "type": "boolean" },
         "voiceDuration": { "type": "number" },

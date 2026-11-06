@@ -46,14 +46,15 @@ service cloud.firestore {
         && data.senderRole is string && data.senderRole.size() <= 20
         && (!('content' in data) || (data.content is string && data.content.size() <= 2000))
         && (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 200000))
-        && (!('audioUrl' in data) || (data.audioUrl is string && data.audioUrl.size() <= 300000))
+        && (!('audioUrl' in data) || (data.audioUrl is string && data.audioUrl.size() <= 500000))
         && (!('sticker' in data) || (data.sticker is string && data.sticker.size() <= 50))
         && (!('isVoice' in data) || data.isVoice is bool)
         && (!('voiceDuration' in data) || data.voiceDuration is number)
         && (!('isWhisper' in data) || data.isWhisper is bool)
         && (!('isRead' in data) || data.isRead is bool)
         && (!('readAt' in data) || (data.readAt is string && data.readAt.size() <= 50))
-        && (!('reactions' in data) || (data.reactions is list && data.reactions.size() <= 20));
+        && (!('reactions' in data) || (data.reactions is list && data.reactions.size() <= 20))
+        && (!('createdAt' in data) || (data.createdAt is string && data.createdAt.size() <= 50));
     }
 
     function isValidMessage(data) {

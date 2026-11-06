@@ -757,6 +757,7 @@ export class CoupleService {
         isRead: false,
         readAt: '',
         reactions: newChat.reactions || [],
+        createdAt: newChat.createdAt,
       });
     } catch (err) {
       handleFirestoreError(err, OperationType.CREATE, `couple_spaces/${this.currentSpaceId}/live_chats`);

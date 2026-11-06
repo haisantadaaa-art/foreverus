@@ -50,6 +50,13 @@ export function calculateLoveDuration(startDateStr: string): LoveDuration {
   };
 }
 
+export function calculateDaysBetween(startDateStr: string, endDateStr?: string): number {
+  const start = new Date(startDateStr);
+  const end = endDateStr ? new Date(endDateStr) : new Date();
+  const diffMs = Math.max(0, end.getTime() - start.getTime());
+  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+}
+
 export function getUpcomingMilestones(startDateStr: string): Milestone[] {
   const start = new Date(startDateStr);
   const now = new Date();

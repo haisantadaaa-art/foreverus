@@ -21,6 +21,7 @@ import { PWAInstallBanner } from './components/PWAInstallBanner';
 import { BottomNav, NavTab } from './components/BottomNav';
 import { SpaceSettingsModal } from './components/SpaceSettingsModal';
 import { VercelExportModal } from './components/VercelExportModal';
+import { LoveJourneyStatsModal } from './components/LoveJourneyStatsModal';
 import { CoupleGateAuth } from './components/CoupleGateAuth';
 import { coupleService } from './services/coupleService';
 import { testFirebaseConnection } from './firebase/config';
@@ -63,7 +64,47 @@ export default function App() {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isJourneyStatsOpen, setIsJourneyStatsOpen] = useState(false);
   const [inAppToast, setInAppToast] = useState<string | null>(null);
+
+  // Force App Update & Cache Purge handler
+  const handleForceUpdate = async () => {
+    setInAppToast('🔄 Đang đồng bộ và làm mới phiên bản mới nhất...');
+    try {
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+          reg.active?.postMessage({ type: 'CLEAR_CACHE' });
+          reg.active?.postMessage({ type: 'SKIP_WAITING' });
+          await reg.update().catch(() => {});
+        }
+      }
+    } catch {}
+    setTimeout(() => {
+      window.location.href = window.location.pathname + '?v=' + Date.now();
+    }, 400);
+  };
+
+  const playIncomingMessageChime = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1318, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(1661, audioCtx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.4);
+    } catch {}
+  };
 
   // Sync dark mode class
   useEffect(() => {
@@ -119,9 +160,27 @@ export default function App() {
       setMessages(newMessages);
     });
 
-    // Subscribe to Live Chats
+    // Subscribe to Live Chats with real-time sound and alert
+    let isInitialChatsSync = true;
+    let lastKnownChatsCount = 0;
+
     const unsubLiveChats = coupleService.subscribeLiveChats((newChats) => {
-      setLiveChats(newChats);
+      setLiveChats(() => {
+        if (!isInitialChatsSync && newChats.length > lastKnownChatsCount) {
+          const latestMsg = newChats[newChats.length - 1];
+          if (latestMsg && latestMsg.senderRole !== currentUserRole) {
+            playIncomingMessageChime();
+            const preview =
+              latestMsg.content ||
+              (latestMsg.isVoice ? '🎙️ Gửi một tin nhắn giọng nói' : '📸 Gửi một bức ảnh mới');
+            setInAppToast(`💬 ${latestMsg.sender}: ${preview}`);
+            if (navigator.vibrate) navigator.vibrate([120, 60, 120]);
+          }
+        }
+        isInitialChatsSync = false;
+        lastKnownChatsCount = newChats.length;
+        return newChats;
+      });
     });
 
     return () => {
@@ -384,14 +443,25 @@ export default function App() {
 
       {/* Real-time Floating Notification Banner */}
       {inAppToast && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] p-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-xl shadow-rose-500/30 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center gap-2 text-xs sm:text-sm font-bold">
-            <Heart className="w-4 h-4 fill-white animate-ping" />
-            <span>{inAppToast}</span>
+        <div
+          onClick={() => {
+            if (inAppToast.startsWith('💬')) {
+              setActiveTab('messages');
+              setInAppToast(null);
+            }
+          }}
+          className="fixed top-16 left-1/2 -translate-x-1/2 z-50 max-w-sm w-[90%] p-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-xl shadow-rose-500/30 flex items-center justify-between gap-2 animate-in fade-in slide-in-from-top-4 duration-300 cursor-pointer"
+        >
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-bold truncate">
+            <Heart className="w-4 h-4 fill-white animate-ping shrink-0" />
+            <span className="truncate">{inAppToast}</span>
           </div>
           <button
-            onClick={() => setInAppToast(null)}
-            className="text-white/80 hover:text-white p-1 text-xs font-bold"
+            onClick={(e) => {
+              e.stopPropagation();
+              setInAppToast(null);
+            }}
+            className="text-white/80 hover:text-white p-1 text-xs font-bold shrink-0"
           >
             ✕
           </button>
@@ -409,6 +479,7 @@ export default function App() {
         onOpenExportModal={() => setIsExportOpen(true)}
         onToggleRole={handleToggleRole}
         onLockSpace={handleLockSpace}
+        onForceUpdate={handleForceUpdate}
       />
 
       {/* Main Content Area */}
@@ -483,6 +554,7 @@ export default function App() {
             onDeleteLetter={handleDeleteMessage}
             onMarkLiveChatsAsRead={async (role) => {
               await coupleService.markLiveChatsAsRead(role);
+              setLiveChats(coupleService.loadLiveChats());
             }}
           />
         )}
@@ -511,6 +583,18 @@ export default function App() {
         onSaveCustomSong={handleSaveCustomSong}
       />
 
+      {/* Floating Quick Action: Open Love Journey Stats */}
+      <div className="fixed bottom-20 right-4 z-30">
+        <button
+          onClick={() => setIsJourneyStatsOpen(true)}
+          title="Xem Bảng Tổng Kết Hành Trình Tình Yêu"
+          className="px-3.5 py-2 rounded-full bg-white/90 dark:bg-zinc-900/90 text-rose-600 dark:text-rose-400 font-bold text-xs shadow-lg shadow-rose-500/20 border border-rose-200 dark:border-zinc-700 backdrop-blur-md flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>Tổng kết tình yêu 🏆</span>
+        </button>
+      </div>
+
       {/* Romantic Footer with Huỳnh Âu Developer Badge */}
       <footer className="w-full text-center py-4 pb-24 text-xs text-zinc-500 dark:text-zinc-400">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-rose-200/80 dark:border-zinc-800 shadow-sm backdrop-blur-sm">
@@ -524,7 +608,17 @@ export default function App() {
       <BottomNav
         activeTab={activeTab}
         onChangeTab={setActiveTab}
-        messageBadgeCount={liveChats.length}
+        messageBadgeCount={liveChats.filter((c) => c.senderRole !== currentUserRole && !c.isRead).length}
+      />
+
+      {/* Love Journey Insights Modal */}
+      <LoveJourneyStatsModal
+        isOpen={isJourneyStatsOpen}
+        onClose={() => setIsJourneyStatsOpen(false)}
+        space={space}
+        memoriesCount={memories.length}
+        lettersCount={messages.length}
+        liveChatsCount={liveChats.length}
       />
 
       {/* Settings & Profile Upload Modal */}

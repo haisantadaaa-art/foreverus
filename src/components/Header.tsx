@@ -12,6 +12,7 @@ import {
   Lock,
   LogOut,
   Palette,
+  RefreshCw,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CoupleSpaceData } from '../types';
@@ -26,6 +27,7 @@ interface HeaderProps {
   onOpenExportModal: () => void;
   onToggleRole: () => void;
   onLockSpace: () => void;
+  onForceUpdate: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,10 +40,12 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenExportModal,
   onToggleRole,
   onLockSpace,
+  onForceUpdate,
 }) => {
   const [copied, setCopied] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [isPinging, setIsPinging] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(space.id);
@@ -157,6 +161,19 @@ export const Header: React.FC<HeaderProps> = ({
             className="p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:bg-rose-50 dark:hover:bg-zinc-800 transition-colors"
           >
             <Palette className="w-4 h-4 text-purple-500" />
+          </button>
+
+          {/* 1-Click Update App / Clear Cache & Sync Latest */}
+          <button
+            onClick={() => {
+              setIsUpdating(true);
+              onForceUpdate();
+            }}
+            title="Cập nhật phiên bản mới nhất (Làm mới bộ nhớ đệm và tải tính năng mới)"
+            aria-label="Cập nhật phiên bản mới"
+            className="p-2 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-zinc-800 transition-colors relative"
+          >
+            <RefreshCw className={`w-4 h-4 ${isUpdating ? 'animate-spin' : ''}`} />
           </button>
 
           {/* Dark Mode toggle */}
